@@ -1,4 +1,4 @@
-package org.mitre.dsmiley.httpproxy;
+package hr.igea.httpproxy;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIUtils;
@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,7 @@ import java.util.regex.Pattern;
  * --which has the template variables.  The incoming request must contain query args of these
  * names.  They are removed when the request is sent to the target.
  */
-public class URITemplateProxyServlet extends ProxyServlet {
+public class URITemplateProxyServlet extends IgeaProxyServlet {
 /* Rich:
  * It might be a nice addition to have some syntax that allowed a proxy arg to be "optional", that is,
  * don't fail if not present, just return the empty string or a given default. But I don't see
@@ -96,22 +95,12 @@ public class URITemplateProxyServlet extends ProxyServlet {
     }
     matcher.appendTail(urlBuf);
     String newTargetUri = urlBuf.toString();
-    String[] newTargetUriParts = newTargetUri.split("\\?");
-    String[] newTargetUriParams = (newTargetUriParts.length==2)?newTargetUriParts[1].split("&"):new String[]{};
-    StringBuilder uriSB = new StringBuilder(newTargetUriParts[0].replace(" ", "+"));
-    for(int i=0; i<newTargetUriParams.length; i++){
-        String param = newTargetUriParams[i];
-        String paramEnc = URLEncoder.encode(param, "UTF-8");
-        uriSB.append((i==0)?"?":"&");
-        uriSB.append(paramEnc);
-    }
-    String newTargetUriEnc = uriSB.toString();
-    servletRequest.setAttribute(ATTR_TARGET_URI, newTargetUriEnc);
+    servletRequest.setAttribute(ATTR_TARGET_URI, newTargetUri);
     URI targetUriObj;
     try {
-      targetUriObj = new URI(newTargetUriEnc);
+      targetUriObj = new URI(newTargetUri);
     } catch (Exception e) {
-      throw new ServletException("Rewritten targetUri is invalid: " + newTargetUriEnc,e);
+      throw new ServletException("Rewritten targetUri is invalid: " + newTargetUri,e);
     }
     servletRequest.setAttribute(ATTR_TARGET_HOST, URIUtils.extractHost(targetUriObj));
 
